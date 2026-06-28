@@ -50,37 +50,99 @@ def _voter_hash(ip: str) -> str:
     return hashlib.sha256(f"{salt}:{ip}".encode("utf-8")).hexdigest()
 
 
-def _serialize(t: Topic, *, public: bool) -> dict:
+def _serialize(t: Topic, *, public: bool, trending: bool = False, badge: str = "") -> dict:
     data = {
         "id": t.id,
         "title": t.title,
         "description": t.description,
         "votes": t.votes,
+        "trending": trending,
+        "badge": badge,
     }
     if not public:
         data["status"] = t.status
         data["source"] = t.source
+        data["sort_order"] = t.sort_order
         data["created_at"] = t.created_at.isoformat() if t.created_at else None
     return data
 
 
+# A topic is "trending" when it is among the public list AND has the highest
+# vote count (with at least this many votes) — a light social-proof signal.
+_TRENDING_MIN_VOTES = 3
+
+
 def list_public_topics(db: Session) -> list[dict]:
-    """Approved + featured topics, featured first, then by votes desc, then newest."""
+    """Approved + featured topics, auto-prioritized by engagement.
+
+    Order: featured first, then engagement score (clicks + 3×signups) desc, then
+    the admin's manual order, then votes. When there's no tracking data yet all
+    scores are 0, so this gracefully falls back to the manual featured/sort_order
+    ordering. Top performers get a badge ("🔥 Most Chosen" / "Popular").
+    """
+    from app.services.analytics_service import topic_engagement_scores
+
     rows = (
         db.query(Topic)
         .filter(Topic.status.in_(PUBLIC_STATUSES))
         .all()
     )
-    rows.sort(key=lambda t: (0 if t.status == "featured" else 1, -t.votes, -(t.id or 0)))
-    return [_serialize(t, public=True) for t in rows]
+    scores = topic_engagement_scores(db)
+
+    def score_of(t: Topic) -> int:
+        return scores.get((t.title or "").strip().lower(), 0)
+
+    rows.sort(key=lambda t: (
+        0 if t.status == "featured" else 1,
+        -score_of(t),
+        t.sort_order or 0,
+        -t.votes,
+        -(t.id or 0),
+    ))
+
+    # Badge the top engagement performers (only when they actually have a score).
+    ranked = sorted(rows, key=lambda t: -score_of(t))
+    badges: dict[int, str] = {}
+    for rank, t in enumerate(ranked):
+        if score_of(t) <= 0:
+            break
+        if rank == 0:
+            badges[t.id] = "🔥 Most Chosen"
+        elif rank <= 2:
+            badges[t.id] = "Popular"
+
+    top_votes = max((t.votes for t in rows), default=0)
+    return [
+        _serialize(
+            t,
+            public=True,
+            trending=(t.votes == top_votes and top_votes >= _TRENDING_MIN_VOTES),
+            badge=badges.get(t.id, ""),
+        )
+        for t in rows
+    ]
 
 
 def list_all_topics(db: Session) -> list[dict]:
     """Every topic for the admin view — pending requests surfaced first."""
     order = {"suggested": 0, "featured": 1, "approved": 2, "archived": 3}
     rows = db.query(Topic).all()
-    rows.sort(key=lambda t: (order.get(t.status, 9), -(t.id or 0)))
+    rows.sort(key=lambda t: (order.get(t.status, 9), t.sort_order or 0, -(t.id or 0)))
     return [_serialize(t, public=False) for t in rows]
+
+
+def reorder_topics(db: Session, *, ordered_ids: list[int]) -> int:
+    """Assign sort_order to topics in the given id sequence (0-based). Returns count updated."""
+    updated = 0
+    for index, topic_id in enumerate(ordered_ids):
+        result = (
+            db.query(Topic)
+            .filter(Topic.id == topic_id)
+            .update({Topic.sort_order: index}, synchronize_session=False)
+        )
+        updated += result
+    db.commit()
+    return updated
 
 
 def create_topic(
@@ -152,6 +214,7 @@ def update_topic(
     status: str | None = None,
     title: str | None = None,
     description: str | None = None,
+    sort_order: int | None = None,
 ) -> dict | None:
     topic = db.query(Topic).filter(Topic.id == topic_id).first()
     if topic is None:
@@ -164,6 +227,8 @@ def update_topic(
         topic.title = title.strip()
     if description is not None:
         topic.description = description.strip() or None
+    if sort_order is not None:
+        topic.sort_order = sort_order
     db.commit()
     db.refresh(topic)
     return _serialize(topic, public=False)

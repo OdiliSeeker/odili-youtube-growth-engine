@@ -71,6 +71,11 @@ class TopicUpdateIn(BaseModel):
     title: str | None = None
     description: str | None = None
     status: str | None = None
+    sort_order: int | None = None
+
+
+class TopicReorderIn(BaseModel):
+    ordered_ids: list[int]
 
 
 def _client_ip(request: Request) -> str:
@@ -129,6 +134,17 @@ async def create_topic(
     )
 
 
+@router.post("/topics/reorder", tags=["Topics"])
+async def reorder_topics(
+    payload: TopicReorderIn,
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_admin),
+) -> dict:
+    """Set the public display order of topics by id sequence. Admin only."""
+    updated = topic_service.reorder_topics(db, ordered_ids=payload.ordered_ids)
+    return {"message": "Topics reordered.", "updated": updated}
+
+
 @router.patch("/topics/{topic_id}", tags=["Topics"])
 async def patch_topic(
     topic_id: int,
@@ -143,6 +159,7 @@ async def patch_topic(
         status=payload.status,
         title=payload.title,
         description=payload.description,
+        sort_order=payload.sort_order,
     )
     if updated is None:
         raise HTTPException(status_code=404, detail="Topic not found or invalid status.")

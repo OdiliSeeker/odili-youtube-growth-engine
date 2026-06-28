@@ -164,7 +164,11 @@ def _gpt_analyse(
     kw_list  = ", ".join(k["keyword"] for k in keywords[:15])
     pat_list = ", ".join(f"{p['pattern']} ({p['count']}x)" for p in patterns[:8])
 
+    from app.services.ai_service import DOCTRINE_GUARDRAILS
+
     prompt = f"""You are a YouTube content strategist for Odili Truth Seeker, a Catholic media ministry focused on teaching authentic Catholic faith, defending truth, and engaging popular culture from a Catholic perspective.
+
+{DOCTRINE_GUARDRAILS}
 
 TOP-PERFORMING VIDEOS (by views):
 {top_block}

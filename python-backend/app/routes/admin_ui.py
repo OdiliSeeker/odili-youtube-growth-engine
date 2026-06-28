@@ -651,6 +651,15 @@ _HTML = """<!DOCTYPE html>
       <div class="nav-item" onclick="navigate('growth')" data-page="growth">
         <span class="nav-icon">🚀</span> Growth Engine
       </div>
+      <div class="nav-item" onclick="navigate('analytics')" data-page="analytics">
+        <span class="nav-icon">📊</span> Analytics
+      </div>
+      <div class="nav-item" onclick="navigate('weekly-distribution')" data-page="weekly-distribution">
+        <span class="nav-icon">📢</span> Weekly Distribution
+      </div>
+      <div class="nav-item" onclick="navigate('traffic-engine')" data-page="traffic-engine">
+        <span class="nav-icon">🎬</span> Traffic Engine
+      </div>
       <div class="nav-section-label">Tools</div>
       <div class="nav-item" onclick="navigate('newsletter')" data-page="newsletter">
         <span class="nav-icon">✉</span> Newsletter Manager
@@ -663,6 +672,9 @@ _HTML = """<!DOCTYPE html>
       </div>
       <div class="nav-item" onclick="navigate('topics')" data-page="topics">
         <span class="nav-icon">🗳️</span> Audience Topics
+      </div>
+      <div class="nav-item" onclick="navigate('content-hub')" data-page="content-hub">
+        <span class="nav-icon">🎬</span> Content Hub
       </div>
       <div class="nav-section-label">System</div>
       <div class="nav-item" onclick="navigate('saved-scripts')" data-page="saved-scripts">
@@ -700,6 +712,157 @@ _HTML = """<!DOCTYPE html>
 
   <!-- Main content -->
   <main class="main-content">
+
+    <!-- ── WEEKLY DISTRIBUTION ── -->
+    <div id="page-weekly-distribution" class="page">
+      <div class="page-header">
+        <h1>📢 Weekly Distribution</h1>
+        <p>Generate ready-to-post social content for the week, then copy &amp; paste it everywhere. Nothing posts automatically.</p>
+      </div>
+      <div class="status-bar" id="wd-status"></div>
+
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px">
+          <div>
+            <h2 style="margin:0">Weekly Posts</h2>
+            <p style="margin:4px 0 0;color:var(--muted);font-size:14px">Sunday reflection · Wednesday apologetics · Friday video promo · image prompt.</p>
+          </div>
+          <button class="btn btn-primary" id="wd-gen-btn" onclick="genWeeklyPosts()">Generate Weekly Posts</button>
+        </div>
+        <div id="wd-output" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px">
+          <div>
+            <h2 style="margin:0">Facebook Distribution Pack</h2>
+            <p style="margin:4px 0 0;color:var(--muted);font-size:14px">A ready post plus the groups you're approved to share into.</p>
+          </div>
+          <button class="btn btn-secondary" onclick="loadFacebookPack()">Load Facebook Pack</button>
+        </div>
+        <div id="fb-output" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <!-- ── TRAFFIC ENGINE ── -->
+    <div id="page-traffic-engine" class="page">
+      <div class="page-header">
+        <h1>🎬 Traffic Engine</h1>
+        <p>Turn one idea into Shorts, hooks, and cross-platform posts that drive traffic back to YouTube.</p>
+      </div>
+      <div class="status-bar" id="te-status"></div>
+
+      <div class="card" style="margin-bottom:20px">
+        <h2 style="margin:0 0 4px">Generate Shorts</h2>
+        <p style="margin:0 0 12px;color:var(--muted);font-size:14px">3-5 vertical-video packages: hook, script, caption, on-screen text, hashtags.</p>
+        <input type="text" id="te-shorts-topic" placeholder="Video topic or theme (leave blank to use your latest video)…" style="width:100%;margin-bottom:10px">
+        <button class="btn btn-primary" onclick="genShorts()">Generate Shorts</button>
+        <div id="te-shorts-out" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <h2 style="margin:0 0 4px">Generate Hooks</h2>
+        <p style="margin:0 0 12px;color:var(--muted);font-size:14px">Five scroll-stopping opening lines for a topic.</p>
+        <input type="text" id="te-hooks-topic" placeholder="Topic (e.g. the Eucharist, the Papacy)…" style="width:100%;margin-bottom:10px">
+        <button class="btn btn-primary" onclick="genHooks()">Generate Hooks</button>
+        <div id="te-hooks-out" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <h2 style="margin:0 0 4px">Repurpose Content</h2>
+        <p style="margin:0 0 12px;color:var(--muted);font-size:14px">One topic or script → Shorts + Facebook + TikTok + YouTube description + email teaser.</p>
+        <textarea id="te-repurpose-input" rows="4" placeholder="Paste a topic or full script to repurpose…" style="width:100%;margin-bottom:10px"></textarea>
+        <button class="btn btn-primary" onclick="genRepurpose()">Repurpose</button>
+        <div id="te-repurpose-out" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 4px">Weekly Posting Plan</h2>
+        <p style="margin:0 0 12px;color:var(--muted);font-size:14px">A simple rhythm to keep traffic flowing all week.</p>
+        <div id="te-plan-out"></div>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div id="page-analytics" class="page">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h1>Analytics</h1>
+          <p>Funnel behavior, headline performance, and topic engagement.</p>
+        </div>
+        <div class="btn-row">
+          <select id="an-range" onchange="loadAnalytics()" style="background:#111;color:#eee;border:1px solid #333;border-radius:8px;padding:8px 10px;font-size:13px">
+            <option value="">All time</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="loadAnalytics()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="status-bar" id="an-status"></div>
+
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon">👁</div>
+          <div class="stat-label">Page Visits</div>
+          <div class="stat-value" id="an-visits">—</div>
+          <div class="stat-sub">Landing page views</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👆</div>
+          <div class="stat-label">CTA Clicks</div>
+          <div class="stat-value" id="an-clicks">—</div>
+          <div class="stat-sub">Hero / mid / final buttons</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Signups</div>
+          <div class="stat-value" id="an-signups">—</div>
+          <div class="stat-sub">New subscribers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-label">Conversion Rate</div>
+          <div class="stat-value" id="an-conv">—</div>
+          <div class="stat-sub">Signups ÷ visits</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-left"><span>📰</span><span class="card-title">Headline Performance</span></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Headline</th><th style="text-align:right">Views</th></tr></thead>
+              <tbody id="an-headlines"><tr class="empty-row"><td colspan="2">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-left"><span>🗳️</span><span class="card-title">Top Topics (by signups)</span></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Topic</th><th style="text-align:right">Signups</th></tr></thead>
+              <tbody id="an-topics"><tr class="empty-row"><td colspan="2">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left"><span>📜</span><span class="card-title">Scroll Depth</span></div>
+        </div>
+        <div class="card-body" id="an-scroll">
+          <div style="color:#8a8a8a;font-size:14px">Loading…</div>
+        </div>
+      </div>
+    </div>
 
     <!-- ── DASHBOARD ── -->
     <div id="page-dashboard" class="page active">
@@ -1048,6 +1211,52 @@ _HTML = """<!DOCTYPE html>
               <tr class="empty-row"><td colspan="4">Loading…</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONTENT HUB ── -->
+    <div id="page-content-hub" class="page">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h1>Content Hub</h1>
+          <p>Curate the landing page's featured Shorts, playlists &amp; community link — and check Catholic news.</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="loadFeaturedAdmin()">↻ Reload</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left"><span>🎬</span><span class="card-title">Featured Content</span></div>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Shorts <span style="color:var(--muted);font-weight:400">(one per line: <code>VIDEO_ID | Title</code>)</span></label>
+            <textarea id="fc-shorts" rows="5" placeholder="Bm2aoEcEIPk | The truth about Salvation"></textarea>
+          </div>
+          <div class="field">
+            <label>Playlists <span style="color:var(--muted);font-weight:400">(one per line: <code>Title | https://youtube.com/playlist?list=…</code>)</span></label>
+            <textarea id="fc-playlists" rows="4" placeholder="Apologetics 101 | https://www.youtube.com/playlist?list=..."></textarea>
+          </div>
+          <div class="field">
+            <label>Community link <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+            <input id="fc-community" type="text" placeholder="https://www.youtube.com/@odilitheseekeroftruth/community">
+          </div>
+          <button class="btn btn-primary" onclick="saveFeaturedAdmin()">Save Featured Content</button>
+          <div class="status-bar" id="fc-status-bar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left"><span>📰</span><span class="card-title">Catholic News</span></div>
+          <button class="btn btn-secondary btn-sm" onclick="refreshNews()">↻ Refresh cache</button>
+        </div>
+        <div class="card-body">
+          <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Supportive headlines from Vatican News &amp; CNA (cached 30 min). Used to inform content ideas — never as doctrinal authority.</p>
+          <div id="news-list"><div class="empty-row">Loading…</div></div>
         </div>
       </div>
     </div>
@@ -1626,10 +1835,14 @@ _HTML = """<!DOCTYPE html>
     dashboard: 'Dashboard',
     youtube: 'YouTube Intelligence',
     growth: 'Growth Engine',
+    analytics: 'Analytics',
+    'weekly-distribution': '📢 Weekly Distribution',
+    'traffic-engine': '🎬 Traffic Engine',
     newsletter: 'Newsletter Manager',
     subscribers: 'Subscribers',
     ideas: 'Content Ideas',
     topics: 'Audience Topics',
+    'content-hub': 'Content Hub',
     'saved-scripts': 'Saved Scripts',
     'youtube-kit': 'YouTube Studio Kit',
     'youtube-playbook': 'YouTube Playbook',
@@ -1647,11 +1860,59 @@ _HTML = """<!DOCTYPE html>
     if (page === 'newsletter')     { loadHistory(); loadStatus(); }
     if (page === 'subscribers')    loadSubscribers();
     if (page === 'topics')         loadAdminTopics();
+    if (page === 'content-hub')    { loadFeaturedAdmin(); loadNews(); }
     if (page === 'youtube')        loadYoutube(false);
     if (page === 'growth')         loadGrowth();
+    if (page === 'analytics')      loadAnalytics();
+    if (page === 'traffic-engine') loadPostingPlan();
     if (page === 'saved-scripts')  loadSavedScripts();
     if (page === 'youtube-kit')    loadYouTubePackages();
     if (page === 'settings')       loadStatus();
+  }
+
+  // ── Analytics ─────────────────────────────────────────────
+  async function loadAnalytics() {
+    const range = $('an-range') ? $('an-range').value : '';
+    const qs = range ? ('?days=' + encodeURIComponent(range)) : '';
+    try {
+      const res = await apiFetch('/analytics/summary' + qs);
+      if (!res.ok) { showBar('an-status', 'Could not load analytics.', 'error'); return; }
+      const d = await res.json();
+
+      $('an-visits').textContent  = fmtNum(d.total_visits || 0);
+      $('an-clicks').textContent  = fmtNum(d.cta_clicks || 0);
+      $('an-signups').textContent = fmtNum(d.subscriptions || 0);
+      $('an-conv').textContent    = (d.conversion_rate || 0) + '%';
+
+      const heads = d.top_headlines || [];
+      $('an-headlines').innerHTML = heads.length
+        ? heads.map(h => '<tr><td>' + esc(h.headline) + '</td><td style="text-align:right">' + fmtNum(h.views) + '</td></tr>').join('')
+        : '<tr class="empty-row"><td colspan="2">No headline data yet.</td></tr>';
+
+      const topics = d.top_topics || [];
+      $('an-topics').innerHTML = topics.length
+        ? topics.map(t => '<tr><td>' + esc(t.topic) + '</td><td style="text-align:right">' + fmtNum(t.count) + '</td></tr>').join('')
+        : '<tr class="empty-row"><td colspan="2">No topic conversions yet.</td></tr>';
+
+      const sd = d.scroll_depth || {};
+      const levels = ['25', '50', '75', '100'];
+      const maxScroll = Math.max(1, ...levels.map(l => sd[l] || 0));
+      $('an-scroll').innerHTML = levels.map(function (lvl) {
+        const v = sd[lvl] || 0;
+        const pct = Math.round((v / maxScroll) * 100);
+        return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">' +
+            '<span style="width:46px;color:#8a8a8a;font-size:13px">' + lvl + '%</span>' +
+            '<span style="flex:1;height:10px;background:#1c1c1c;border-radius:6px;overflow:hidden">' +
+              '<span style="display:block;height:100%;width:' + pct + '%;background:#FFD700"></span>' +
+            '</span>' +
+            '<span style="width:56px;text-align:right;font-size:13px">' + fmtNum(v) + '</span>' +
+          '</div>';
+      }).join('');
+
+      $('an-status').style.display = 'none';
+    } catch (e) {
+      showBar('an-status', 'Network error loading analytics.', 'error');
+    }
   }
 
   // ── App init ──────────────────────────────────────────────
@@ -1853,6 +2114,8 @@ _HTML = """<!DOCTYPE html>
     archived:  { label: 'Archived',  color: 'var(--muted)' },
   };
 
+  let _adminTopics = [];
+
   async function loadAdminTopics() {
     const tbody = $('topic-table-body');
     tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Loading…</td></tr>';
@@ -1861,29 +2124,55 @@ _HTML = """<!DOCTYPE html>
       if (!res.ok) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Failed to load.</td></tr>'; return; }
       const { topics, count } = await res.json();
       $('topic-count-display').textContent = count;
-      if (!topics.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No topics yet.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = topics.map(t => {
-        const meta = TOPIC_STATUS_META[t.status] || { label: t.status, color: 'var(--muted)' };
-        const desc = t.description ? '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + esc(t.description) + '</div>' : '';
-        const src  = t.source === 'visitor' ? ' <span style="font-size:11px;color:var(--muted)">· visitor request</span>' : '';
-        return '<tr>' +
-          '<td><div style="font-weight:600">' + esc(t.title) + src + '</div>' + desc + '</td>' +
-          '<td style="text-align:center;font-weight:700">' + (t.votes || 0) + '</td>' +
-          '<td style="text-align:center"><span style="color:' + meta.color + ';font-weight:600;font-size:12px">' + meta.label + '</span></td>' +
-          '<td style="text-align:right;white-space:nowrap">' +
-            (t.status !== 'featured'  ? '<button class="btn btn-secondary btn-sm" onclick="setTopicStatus(' + t.id + ', &quot;featured&quot;)">Feature</button> ' : '') +
-            (t.status !== 'approved'  ? '<button class="btn btn-secondary btn-sm" onclick="setTopicStatus(' + t.id + ', &quot;approved&quot;)">Approve</button> ' : '') +
-            (t.status !== 'archived'  ? '<button class="btn btn-secondary btn-sm" onclick="setTopicStatus(' + t.id + ', &quot;archived&quot;)">Archive</button> ' : '') +
-            '<button class="btn btn-danger btn-sm" onclick="deleteAdminTopic(' + t.id + ')">Delete</button>' +
-          '</td>' +
-        '</tr>';
-      }).join('');
+      _adminTopics = topics || [];
+      renderAdminTopics();
     } catch (e) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Error loading topics.</td></tr>';
     }
+  }
+
+  function renderAdminTopics() {
+    const tbody = $('topic-table-body');
+    const topics = _adminTopics;
+    if (!topics.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No topics yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = topics.map((t, i) => {
+      const meta = TOPIC_STATUS_META[t.status] || { label: t.status, color: 'var(--muted)' };
+      const desc = t.description ? '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + esc(t.description) + '</div>' : '';
+      const src  = t.source === 'visitor' ? ' <span style="font-size:11px;color:var(--muted)">· visitor request</span>' : '';
+      const trend = t.trending ? ' <span style="font-size:11px;color:var(--gold);font-weight:700">🔥 Trending</span>' : '';
+      const up   = '<button class="btn btn-secondary btn-sm" onclick="moveTopic(' + t.id + ',-1)"' + (i === 0 ? ' disabled' : '') + ' title="Move up">↑</button> ';
+      const down = '<button class="btn btn-secondary btn-sm" onclick="moveTopic(' + t.id + ',1)"' + (i === topics.length - 1 ? ' disabled' : '') + ' title="Move down">↓</button> ';
+      return '<tr>' +
+        '<td><div style="font-weight:600">' + esc(t.title) + src + trend + '</div>' + desc + '</td>' +
+        '<td style="text-align:center;font-weight:700">' + (t.votes || 0) + '</td>' +
+        '<td style="text-align:center"><span style="color:' + meta.color + ';font-weight:600;font-size:12px">' + meta.label + '</span></td>' +
+        '<td style="text-align:right;white-space:nowrap">' +
+          up + down +
+          (t.status !== 'featured'  ? '<button class="btn btn-secondary btn-sm" onclick="setTopicStatus(' + t.id + ', &quot;featured&quot;)">Feature</button> ' : '') +
+          (t.status !== 'approved'  ? '<button class="btn btn-secondary btn-sm" onclick="setTopicStatus(' + t.id + ', &quot;approved&quot;)">Approve</button> ' : '') +
+          (t.status !== 'archived'  ? '<button class="btn btn-secondary btn-sm" onclick="setTopicStatus(' + t.id + ', &quot;archived&quot;)">Archive</button> ' : '') +
+          '<button class="btn btn-danger btn-sm" onclick="deleteAdminTopic(' + t.id + ')">Delete</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  async function moveTopic(id, dir) {
+    const idx = _adminTopics.findIndex(t => t.id === id);
+    if (idx < 0) return;
+    const j = idx + dir;
+    if (j < 0 || j >= _adminTopics.length) return;
+    const a = _adminTopics[idx]; _adminTopics[idx] = _adminTopics[j]; _adminTopics[j] = a;
+    renderAdminTopics();
+    try {
+      await apiFetch('/topics/reorder', {
+        method: 'POST',
+        body: JSON.stringify({ ordered_ids: _adminTopics.map(t => t.id) }),
+      });
+    } catch (e) { /* order will re-sync on next reload */ }
   }
 
   async function createAdminTopic() {
@@ -1919,6 +2208,85 @@ _HTML = """<!DOCTYPE html>
       if (!res.ok) { alert('Failed to delete topic.'); return; }
       loadAdminTopics();
     } catch (e) { alert('Network error. Try again.'); }
+  }
+
+  // ── Content Hub: featured content ─────────────────────────
+  function _parseShorts(text) {
+    return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+      const parts = l.split('|');
+      return { id: (parts[0] || '').trim(), title: parts.slice(1).join('|').trim() };
+    }).filter(s => s.id);
+  }
+  function _parsePlaylists(text) {
+    return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+      const parts = l.split('|');
+      if (parts.length >= 2) return { title: parts[0].trim(), url: parts.slice(1).join('|').trim() };
+      return { title: '', url: parts[0].trim() };
+    }).filter(p => p.url);
+  }
+
+  async function loadFeaturedAdmin() {
+    try {
+      const res = await apiFetch('/featured-content');
+      if (!res.ok) return;
+      const d = await res.json();
+      $('fc-shorts').value = (d.shorts || []).map(s => s.title ? (s.id + ' | ' + s.title) : s.id).join('\n');
+      $('fc-playlists').value = (d.playlists || []).map(p => (p.title ? (p.title + ' | ') : '') + p.url).join('\n');
+      $('fc-community').value = d.community_url || '';
+    } catch (e) { /* leave fields as-is */ }
+  }
+
+  async function saveFeaturedAdmin() {
+    const body = {
+      shorts: _parseShorts($('fc-shorts').value),
+      playlists: _parsePlaylists($('fc-playlists').value),
+      community_url: $('fc-community').value.trim(),
+    };
+    try {
+      const res = await apiFetch('/featured-content', { method: 'PUT', body: JSON.stringify(body) });
+      if (!res.ok) { showBar('fc-status-bar', 'Failed to save featured content.', 'error'); return; }
+      showBar('fc-status-bar', '✓ Featured content saved — it is now live on the landing page.', 'success');
+      loadFeaturedAdmin();
+      setTimeout(() => { const b = $('fc-status-bar'); if (b) b.className = 'status-bar'; }, 4000);
+    } catch (e) { showBar('fc-status-bar', 'Network error. Try again.', 'error'); }
+  }
+
+  // ── Content Hub: Catholic news ────────────────────────────
+  async function loadNews() {
+    const box = $('news-list');
+    if (!box) return;
+    box.innerHTML = '<div class="empty-row">Loading…</div>';
+    try {
+      const res = await apiFetch('/news');
+      if (!res.ok) { box.innerHTML = '<div class="empty-row">Failed to load news.</div>'; return; }
+      const d = await res.json();
+      const items = d.headlines || [];
+      if (!items.length) {
+        box.innerHTML = '<div class="empty-row">' + esc(d.note || 'No headlines available right now.') + '</div>';
+        return;
+      }
+      const note = d.note ? '<div style="color:var(--muted);font-size:12px;margin-bottom:10px">' + esc(d.note) + '</div>' : '';
+      const safeHttp = (u) => /^https?:\/\//i.test(String(u || ''));
+      box.innerHTML = note + items.map(h => {
+        const title = esc(h.title);
+        // Only make the headline clickable when the link is a real http(s) URL —
+        // never trust an upstream feed to supply a safe scheme (no javascript:/data:).
+        const titleHtml = safeHttp(h.link)
+          ? '<a href="' + esc(h.link) + '" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;font-weight:600">' + title + '</a>'
+          : '<span style="color:var(--text);font-weight:600">' + title + '</span>';
+        return '<div style="padding:10px 0;border-bottom:1px solid var(--border)">' +
+            titleHtml +
+            '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + esc(h.source || '') + (h.published ? ' · ' + esc(h.published) : '') + '</div>' +
+          '</div>';
+      }).join('');
+    } catch (e) { box.innerHTML = '<div class="empty-row">Network error loading news.</div>'; }
+  }
+
+  async function refreshNews() {
+    const box = $('news-list');
+    if (box) box.innerHTML = '<div class="empty-row">Refreshing…</div>';
+    try { await apiFetch('/news/refresh', { method: 'POST' }); } catch (e) { /* fall through to reload */ }
+    loadNews();
   }
 
   // ── Newsletter ────────────────────────────────────────────
@@ -3733,6 +4101,136 @@ _HTML = """<!DOCTYPE html>
       if (!res.ok) { const d = await res.json(); showBar('pl-status', aiErrText(d, 'Could not delete.'), 'error'); return; }
       loadPipeline();
     } catch (e) { showBar('pl-status', 'Network error.', 'error'); }
+  }
+
+  // ── Weekly Distribution + Traffic Engine ──────────────────
+  function _postBlock(title, text) {
+    return '<div class="card" style="margin-bottom:14px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">'
+      + '<strong style="color:var(--gold)">' + esc(title) + '</strong>'
+      + '<button class="btn btn-secondary btn-sm" onclick="copyText(' + jsAttr(text || '') + ', ' + jsAttr(title) + ')">Copy</button>'
+      + '</div><div style="white-space:pre-wrap">' + esc(text) + '</div></div>';
+  }
+
+  function _renderShorts(shorts) {
+    if (!shorts || !shorts.length) return '<p style="color:var(--muted)">No shorts returned.</p>';
+    return shorts.map(function (s, i) {
+      const tags = (s.hashtags || []).join(' ');
+      const full = 'HOOK: ' + s.hook + '\n\nSCRIPT: ' + s.script + '\n\nCAPTION: ' + s.caption
+        + '\n\nON-SCREEN: ' + s.on_screen_text + '\n\n' + tags;
+      return '<div class="card" style="margin-bottom:12px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">'
+        + '<strong style="color:var(--gold)">Short ' + (i + 1) + '</strong>'
+        + '<button class="btn btn-secondary btn-sm" onclick="copyText(' + jsAttr(full) + ', \\'Short\\')">Copy</button></div>'
+        + '<div style="white-space:pre-wrap"><strong>Hook:</strong> ' + esc(s.hook)
+        + '\n<strong>Script:</strong> ' + esc(s.script)
+        + '\n<strong>Caption:</strong> ' + esc(s.caption)
+        + '\n<strong>On-screen:</strong> ' + esc(s.on_screen_text)
+        + '\n<strong>Hashtags:</strong> ' + esc(tags) + '</div></div>';
+    }).join('');
+  }
+
+  async function genWeeklyPosts() {
+    const btn = $('wd-gen-btn'); const out = $('wd-output');
+    const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Generating…';
+    out.innerHTML = '<p style="color:var(--muted)">Generating posts…</p>';
+    try {
+      const res = await apiFetch('/content/generate-weekly-posts', { method: 'POST', body: '{}' });
+      if (!res.ok) { out.innerHTML = ''; showBar('wd-status', 'Could not generate posts.', 'error'); return; }
+      const d = await res.json();
+      out.innerHTML = _postBlock('📖 Sunday — Reflection', d.sunday_post)
+        + _postBlock('⚔ Wednesday — Apologetics', d.wednesday_post)
+        + _postBlock('▶ Friday — Video Promo', d.friday_post)
+        + _postBlock('🎨 Image Prompt', d.optional_image_prompt);
+    } catch (e) { out.innerHTML = ''; showBar('wd-status', 'Network error.', 'error'); }
+    finally { btn.disabled = false; btn.textContent = orig; }
+  }
+
+  async function loadFacebookPack() {
+    const out = $('fb-output');
+    out.innerHTML = '<p style="color:var(--muted)">Loading…</p>';
+    try {
+      const res = await apiFetch('/content/facebook-pack');
+      if (!res.ok) { out.innerHTML = ''; showBar('wd-status', 'Could not load Facebook pack.', 'error'); return; }
+      const d = await res.json();
+      let html = _postBlock('📝 Ready-to-Post', d.post_text);
+      const groups = (d.suggested_groups || []).map(function (g) {
+        return '<li style="margin-bottom:6px"><a href="' + esc(g) + '" target="_blank" rel="noopener" style="color:var(--gold)">' + esc(g) + '</a></li>';
+      }).join('');
+      html += '<div class="card" style="margin-bottom:14px"><strong style="color:var(--gold)">Suggested Groups</strong>'
+        + '<ul style="margin:10px 0 0 18px">' + (groups || '<li style="color:var(--muted)">No groups configured.</li>') + '</ul></div>';
+      const tips = (d.instructions || []).map(function (t) { return '<li style="margin-bottom:6px">' + esc(t) + '</li>'; }).join('');
+      if (tips) html += '<div class="card"><strong style="color:var(--gold)">Posting Instructions</strong><ul style="margin:10px 0 0 18px">' + tips + '</ul></div>';
+      out.innerHTML = html;
+    } catch (e) { out.innerHTML = ''; showBar('wd-status', 'Network error.', 'error'); }
+  }
+
+  async function genShorts() {
+    const topic = $('te-shorts-topic').value.trim();
+    const out = $('te-shorts-out');
+    out.innerHTML = '<p style="color:var(--muted)">Generating…</p>';
+    try {
+      const res = await apiFetch('/content/generate-shorts', { method: 'POST', body: JSON.stringify({ video_topic: topic }) });
+      if (!res.ok) { out.innerHTML = ''; showBar('te-status', 'Could not generate shorts.', 'error'); return; }
+      const d = await res.json();
+      out.innerHTML = _renderShorts(d.shorts);
+    } catch (e) { out.innerHTML = ''; showBar('te-status', 'Network error.', 'error'); }
+  }
+
+  async function genHooks() {
+    const topic = $('te-hooks-topic').value.trim();
+    if (!topic) { showBar('te-status', 'Enter a topic for hooks.', 'error'); return; }
+    const out = $('te-hooks-out');
+    out.innerHTML = '<p style="color:var(--muted)">Generating…</p>';
+    try {
+      const res = await apiFetch('/content/generate-hooks', { method: 'POST', body: JSON.stringify({ topic: topic }) });
+      if (!res.ok) { out.innerHTML = ''; showBar('te-status', 'Could not generate hooks.', 'error'); return; }
+      const d = await res.json();
+      const hooks = d.hooks || [];
+      const all = hooks.join('\n');
+      out.innerHTML = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+        + '<strong style="color:var(--gold)">5 Hooks</strong>'
+        + '<button class="btn btn-secondary btn-sm" onclick="copyText(' + jsAttr(all) + ', \\'Hooks\\')">Copy All</button></div>'
+        + '<ul style="margin:0 0 0 18px">' + hooks.map(function (h) { return '<li style="margin-bottom:6px">' + esc(h) + '</li>'; }).join('') + '</ul></div>';
+    } catch (e) { out.innerHTML = ''; showBar('te-status', 'Network error.', 'error'); }
+  }
+
+  async function genRepurpose() {
+    const input = $('te-repurpose-input').value.trim();
+    if (!input) { showBar('te-status', 'Enter a topic or script to repurpose.', 'error'); return; }
+    const out = $('te-repurpose-out');
+    out.innerHTML = '<p style="color:var(--muted)">Generating…</p>';
+    try {
+      const res = await apiFetch('/content/repurpose', { method: 'POST', body: JSON.stringify({ topic: input }) });
+      if (!res.ok) { out.innerHTML = ''; showBar('te-status', 'Could not repurpose.', 'error'); return; }
+      const d = await res.json();
+      let html = '<h3 style="color:var(--gold);margin:0 0 10px">Shorts</h3>' + _renderShorts(d.shorts);
+      html += _postBlock('📘 Facebook Post', d.facebook_post);
+      html += _postBlock('🎵 TikTok Caption', d.tiktok_caption);
+      html += _postBlock('▶ YouTube Description', d.youtube_description);
+      html += _postBlock('✉ Email Teaser', d.email_teaser);
+      out.innerHTML = html;
+    } catch (e) { out.innerHTML = ''; showBar('te-status', 'Network error.', 'error'); }
+  }
+
+  async function loadPostingPlan() {
+    const out = $('te-plan-out');
+    if (!out) return;
+    out.innerHTML = '<p style="color:var(--muted)">Loading…</p>';
+    try {
+      const res = await apiFetch('/content/posting-plan');
+      if (!res.ok) { out.innerHTML = '<p style="color:var(--muted)">Could not load plan.</p>'; return; }
+      const d = await res.json();
+      const p = d.weekly_plan || {};
+      const days = [['Monday', p.monday], ['Wednesday', p.wednesday], ['Friday', p.friday], ['Sunday', p.sunday]];
+      let html = '<ul style="margin:0 0 0 18px">' + days.map(function (x) {
+        return '<li style="margin-bottom:8px"><strong style="color:var(--gold)">' + x[0] + ':</strong> ' + esc(x[1] || '') + '</li>';
+      }).join('') + '</ul>';
+      const tips = d.tips || [];
+      if (tips.length) html += '<div style="margin-top:12px;color:var(--muted)"><strong>Tips:</strong><ul style="margin:6px 0 0 18px">'
+        + tips.map(function (t) { return '<li style="margin-bottom:4px">' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+      out.innerHTML = html;
+    } catch (e) { out.innerHTML = '<p style="color:var(--muted)">Network error.</p>'; }
   }
 
   // Auto-login

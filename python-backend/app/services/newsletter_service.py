@@ -60,14 +60,19 @@ def email_shell(eyebrow: str, title: str, inner_html: str) -> str:
 <body style="margin:0;padding:0;background:#000000;font-family:{_EMAIL_FONT};color:#ffffff;line-height:1.7;-webkit-font-smoothing:antialiased">
   <div style="max-width:600px;margin:0 auto;background:#0c0c0e">
 
-    <!-- HEADER -->
-    <div style="background:#000000;text-align:center;padding:30px 20px 24px;border-bottom:3px solid #FFD700">
-      <img src="{logo_url}" alt="Odili — The Seeker of Truth"
-           style="display:block;margin:0 auto 20px;height:60px;max-height:60px;width:auto">
-      <div style="color:#FFD700;font-size:15px;font-weight:bold;letter-spacing:1px;text-transform:uppercase">
-        Odili — The Seeker of Truth
-      </div>
-    </div>
+    <!-- HEADER (static logo, top-left) -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="background:#000000;border-bottom:3px solid #FFD700">
+      <tr>
+        <td style="padding:22px 28px;text-align:left">
+          <img src="{logo_url}" alt="Odili — The Seeker of Truth"
+               style="height:50px;max-height:50px;width:auto;vertical-align:middle;display:inline-block">
+          <span style="color:#FFD700;font-size:15px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;vertical-align:middle;margin-left:12px">
+            Odili — The Seeker of Truth
+          </span>
+        </td>
+      </tr>
+    </table>
 
     <!-- TITLE + BODY -->
     <div style="padding:36px 30px;color:#eaeaea;font-size:15px">

@@ -135,10 +135,13 @@ def _seq() -> list[dict]:
     ]
 
 
-def send_drip_email(to_email: str, idx: int) -> bool:
+def send_drip_email(to_email: str, idx: int, interest: str | None = None) -> bool:
     """
     Render and send drip email at 0-based ``idx`` (0..4). Returns True on success.
     Uses the shared branded email shell (logo header + YouTube CTA + unsubscribe).
+
+    ``interest`` (the topic the subscriber arrived via) personalizes the opening
+    line of every email — see :mod:`app.services.segment_service`.
     """
     if idx < 0 or idx >= TOTAL_STEPS:
         logger.error("Drip: invalid email index %s", idx)
@@ -147,20 +150,24 @@ def send_drip_email(to_email: str, idx: int) -> bool:
     from app.services.email_sender_service import send_email
     from app.services.newsletter_service import email_shell, _plain_text_footer
     from app.services.token_service import make_unsubscribe_url
+    from app.services.segment_service import segment_line
 
     item = _seq()[idx]
     unsubscribe_url = make_unsubscribe_url(to_email)
 
+    # Personalize: prepend an interest-aware opening line to the body.
+    inner = _p(segment_line(interest)) + item["inner"]
+
     html_body = email_shell(
         eyebrow=item["eyebrow"],
         title=item["title"],
-        inner_html=item["inner"],
+        inner_html=inner,
     ).replace("{UNSUBSCRIBE_URL}", unsubscribe_url)
 
     # Plain-text fallback: strip tags crudely from the inner body.
     import re
 
-    text_inner = re.sub(r"<[^>]+>", "", item["inner"]).strip()
+    text_inner = re.sub(r"<[^>]+>", "", inner).strip()
     text_body = (
         f"{item['title']}\n\n{text_inner}\n\nWatch on YouTube: {_video_link()}"
         + _plain_text_footer()
@@ -231,7 +238,7 @@ def start_drip(email: str) -> None:
             return
         if not _claim_step(db, sub.id, 0):
             return  # another path already claimed email 1
-        if not send_drip_email(sub.email, 0):
+        if not send_drip_email(sub.email, 0, sub.interest):
             _release_step(db, sub.id, 0)  # send failed — let it retry
     except Exception as exc:
         logger.error("start_drip failed for %s: %s", email, exc, exc_info=True)
@@ -270,7 +277,7 @@ def process_due_drips(db: Session) -> int:
         # Atomically claim the step before sending; skip if another path won it.
         if not _claim_step(db, sub.id, step):
             continue
-        if send_drip_email(sub.email, step):
+        if send_drip_email(sub.email, step, sub.interest):
             sent += 1
         else:
             _release_step(db, sub.id, step)  # send failed — retry next pass

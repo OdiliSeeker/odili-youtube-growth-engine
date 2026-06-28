@@ -173,10 +173,30 @@ class Topic(Base):
     votes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="suggested", nullable=False, index=True)
     source: Mapped[str] = mapped_column(String(20), default="admin", nullable=False)
+    # Manual display order for the public list (lower = earlier). Admin-controlled.
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
 
     def __repr__(self) -> str:
         return f"<Topic id={self.id} status={self.status!r} votes={self.votes} title={self.title!r}>"
+
+
+class Event(Base):
+    """A lightweight funnel-analytics event (page view, CTA click, scroll, etc.).
+
+    ``event_name`` is allow-listed at the API layer; ``data`` is a small JSON
+    object stored as text. New table — auto-created via ``create_all``.
+    """
+
+    __tablename__ = "events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_name: Mapped[str] = mapped_column(String(60), nullable=False, index=True)
+    data: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON object
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
+
+    def __repr__(self) -> str:
+        return f"<Event id={self.id} event_name={self.event_name!r}>"
 
 
 class TopicVote(Base):

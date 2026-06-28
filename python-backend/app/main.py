@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app.startup import validate_environment
 from app.db import init_db
 from app.services.auto_scheduler import start_scheduler, stop_scheduler
-from app.routes import health, ideas, playlist, emails, newsletter, admin, admin_ui, unsubscribe, subscribe_ui, youtube, scripts, youtube_packages, landing, growth, topics
+from app.routes import health, ideas, playlist, emails, newsletter, admin, admin_ui, unsubscribe, subscribe_ui, youtube, scripts, youtube_packages, landing, growth, topics, news, featured, analytics, content
 
 logging.basicConfig(
     level=logging.INFO,
@@ -80,3 +80,7 @@ app.include_router(scripts.router)
 app.include_router(youtube_packages.router)
 app.include_router(growth.router)
 app.include_router(topics.router)
+app.include_router(news.router)
+app.include_router(featured.router)
+app.include_router(analytics.router)
+app.include_router(content.router)

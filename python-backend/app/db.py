@@ -48,17 +48,25 @@ def _ensure_columns() -> None:
     first created. ``create_all`` only creates missing *tables*, never adds
     columns to an existing one, so we patch them in by hand.
     """
-    # column_name -> ALTER definition
+    # table_name -> {column_name -> ALTER definition}
     wanted = {
-        "interest": "ALTER TABLE subscribers ADD COLUMN interest VARCHAR(120)",
-        "drip_step": "ALTER TABLE subscribers ADD COLUMN drip_step INTEGER NOT NULL DEFAULT 0",
+        "subscribers": {
+            "interest": "ALTER TABLE subscribers ADD COLUMN interest VARCHAR(120)",
+            "drip_step": "ALTER TABLE subscribers ADD COLUMN drip_step INTEGER NOT NULL DEFAULT 0",
+        },
+        "topics": {
+            "sort_order": "ALTER TABLE topics ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0",
+        },
     }
     with engine.begin() as conn:
-        existing = {row[1] for row in conn.execute(text("PRAGMA table_info(subscribers)"))}
-        for col, ddl in wanted.items():
-            if col not in existing:
-                conn.execute(text(ddl))
-                logger.info("Migrated subscribers table: added column %r", col)
+        for table, cols in wanted.items():
+            existing = {row[1] for row in conn.execute(text(f"PRAGMA table_info({table})"))}
+            if not existing:
+                continue  # table not created yet — create_all handles it fresh
+            for col, ddl in cols.items():
+                if col not in existing:
+                    conn.execute(text(ddl))
+                    logger.info("Migrated %s table: added column %r", table, col)
 
 
 def init_db() -> None:
