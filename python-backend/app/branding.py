@@ -120,27 +120,27 @@ HEADER_CSS = """<style>
   .odili-nav a:hover { color: #FFD700; background: rgba(255,215,0,.10); }
   .odili-nav a.odili-yt { background: #8B0000; color: #fff; }
   .odili-nav a.odili-yt:hover { background: #a81010; color: #fff; }
-  .odili-social { display: inline-flex; align-items: center; gap: 10px; }
+  .odili-social { display: inline-flex; align-items: center; gap: 14px; }
   .odili-soc {
-    width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 8px; text-decoration: none;
-    transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 6px; border-radius: 8px; text-decoration: none;
+    transition: transform .15s ease, filter .15s ease, box-shadow .15s ease, background .15s ease;
   }
-  .odili-soc svg { width: 22px; height: 22px; display: block; }
+  .odili-soc svg { width: 30px; height: 30px; display: block; }
   .odili-soc:hover {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 5px rgba(255,215,0,.85));
+    transform: scale(1.15);
+    background: rgba(255,215,0,.10);
+    filter: drop-shadow(0 0 6px rgba(255,215,0,.85));
     box-shadow: 0 0 12px rgba(255,215,0,.35);
   }
   @media (max-width: 560px) {
     .odili-header { padding: 7px 14px; }
     .odili-brand img { height: 40px; }
-    .odili-brand .odili-name { font-size: 14px; }
+    .odili-brand .odili-name { display: none; }
     .odili-nav a { padding: 7px 11px; font-size: 13px; }
     .odili-nav a.odili-sub { display: none; }
-  }
-  @media (max-width: 380px) {
-    .odili-brand .odili-name { display: none; }
+    .odili-soc svg { width: 26px; height: 26px; }
+    .odili-social { gap: 10px; }
   }
 </style>"""
 

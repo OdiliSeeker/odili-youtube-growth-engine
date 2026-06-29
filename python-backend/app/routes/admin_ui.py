@@ -1754,9 +1754,26 @@ _HTML = """<!DOCTYPE html>
   let _ytData = null;
   let _ytChannelUrl = '';
 
+  // Resilient key storage: sessionStorage can throw (SecurityError) when the
+  // dashboard is embedded in a cross-origin iframe or when storage is blocked.
+  // Fall back to an in-memory key so sign-in still works for this page load.
+  let _memKey = '';
+  function getStoredKey() {
+    try { return sessionStorage.getItem(SESSION_KEY) || _memKey || ''; }
+    catch (e) { return _memKey || ''; }
+  }
+  function setStoredKey(k) {
+    _memKey = k || '';
+    try { sessionStorage.setItem(SESSION_KEY, k); } catch (e) {}
+  }
+  function clearStoredKey() {
+    _memKey = '';
+    try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+  }
+
   // ── Helpers ──────────────────────────────────────────────
   const $ = id => document.getElementById(id);
-  function apiKey() { return sessionStorage.getItem(SESSION_KEY) || ''; }
+  function apiKey() { return getStoredKey(); }
 
   async function apiFetch(path, opts = {}) {
     const headers = {
@@ -1817,13 +1834,13 @@ _HTML = """<!DOCTYPE html>
       const res = await fetch('/admin/status', { headers: { 'x-api-key': key } });
       if (res.status === 401) { errEl.textContent = 'Invalid API key. Try again.'; return; }
       if (!res.ok) { errEl.textContent = 'Server error. Check backend is running.'; return; }
-      sessionStorage.setItem(SESSION_KEY, key);
+      setStoredKey(key);
       showApp();
     } catch (e) { errEl.textContent = 'Could not reach the server. Try again.'; }
   }
 
   function signOut() {
-    sessionStorage.removeItem(SESSION_KEY);
+    clearStoredKey();
     $('app').style.display = 'none';
     $('login').style.display = 'flex';
     $('key-input').value = '';
@@ -2212,13 +2229,13 @@ _HTML = """<!DOCTYPE html>
 
   // ── Content Hub: featured content ─────────────────────────
   function _parseShorts(text) {
-    return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    return text.split('\\n').map(l => l.trim()).filter(Boolean).map(l => {
       const parts = l.split('|');
       return { id: (parts[0] || '').trim(), title: parts.slice(1).join('|').trim() };
     }).filter(s => s.id);
   }
   function _parsePlaylists(text) {
-    return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    return text.split('\\n').map(l => l.trim()).filter(Boolean).map(l => {
       const parts = l.split('|');
       if (parts.length >= 2) return { title: parts[0].trim(), url: parts.slice(1).join('|').trim() };
       return { title: '', url: parts[0].trim() };
@@ -2230,8 +2247,8 @@ _HTML = """<!DOCTYPE html>
       const res = await apiFetch('/featured-content');
       if (!res.ok) return;
       const d = await res.json();
-      $('fc-shorts').value = (d.shorts || []).map(s => s.title ? (s.id + ' | ' + s.title) : s.id).join('\n');
-      $('fc-playlists').value = (d.playlists || []).map(p => (p.title ? (p.title + ' | ') : '') + p.url).join('\n');
+      $('fc-shorts').value = (d.shorts || []).map(s => s.title ? (s.id + ' | ' + s.title) : s.id).join('\\n');
+      $('fc-playlists').value = (d.playlists || []).map(p => (p.title ? (p.title + ' | ') : '') + p.url).join('\\n');
       $('fc-community').value = d.community_url || '';
     } catch (e) { /* leave fields as-is */ }
   }
@@ -4116,17 +4133,17 @@ _HTML = """<!DOCTYPE html>
     if (!shorts || !shorts.length) return '<p style="color:var(--muted)">No shorts returned.</p>';
     return shorts.map(function (s, i) {
       const tags = (s.hashtags || []).join(' ');
-      const full = 'HOOK: ' + s.hook + '\n\nSCRIPT: ' + s.script + '\n\nCAPTION: ' + s.caption
-        + '\n\nON-SCREEN: ' + s.on_screen_text + '\n\n' + tags;
+      const full = 'HOOK: ' + s.hook + '\\n\\nSCRIPT: ' + s.script + '\\n\\nCAPTION: ' + s.caption
+        + '\\n\\nON-SCREEN: ' + s.on_screen_text + '\\n\\n' + tags;
       return '<div class="card" style="margin-bottom:12px">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">'
         + '<strong style="color:var(--gold)">Short ' + (i + 1) + '</strong>'
         + '<button class="btn btn-secondary btn-sm" onclick="copyText(' + jsAttr(full) + ', \\'Short\\')">Copy</button></div>'
         + '<div style="white-space:pre-wrap"><strong>Hook:</strong> ' + esc(s.hook)
-        + '\n<strong>Script:</strong> ' + esc(s.script)
-        + '\n<strong>Caption:</strong> ' + esc(s.caption)
-        + '\n<strong>On-screen:</strong> ' + esc(s.on_screen_text)
-        + '\n<strong>Hashtags:</strong> ' + esc(tags) + '</div></div>';
+        + '\\n<strong>Script:</strong> ' + esc(s.script)
+        + '\\n<strong>Caption:</strong> ' + esc(s.caption)
+        + '\\n<strong>On-screen:</strong> ' + esc(s.on_screen_text)
+        + '\\n<strong>Hashtags:</strong> ' + esc(tags) + '</div></div>';
     }).join('');
   }
 
@@ -4187,7 +4204,7 @@ _HTML = """<!DOCTYPE html>
       if (!res.ok) { out.innerHTML = ''; showBar('te-status', 'Could not generate hooks.', 'error'); return; }
       const d = await res.json();
       const hooks = d.hooks || [];
-      const all = hooks.join('\n');
+      const all = hooks.join('\\n');
       out.innerHTML = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
         + '<strong style="color:var(--gold)">5 Hooks</strong>'
         + '<button class="btn btn-secondary btn-sm" onclick="copyText(' + jsAttr(all) + ', \\'Hooks\\')">Copy All</button></div>'
@@ -4234,7 +4251,7 @@ _HTML = """<!DOCTYPE html>
   }
 
   // Auto-login
-  if (sessionStorage.getItem(SESSION_KEY)) showApp();
+  if (getStoredKey()) showApp();
 </script>
 </body>
 </html>"""
