@@ -36,6 +36,7 @@ ALLOWED_EVENTS = {
     "scroll_depth",
     "headline_variant",
     "signup",
+    "vote",
 }
 
 _MAX_DATA_BYTES = 2000  # cap stored JSON size per event
@@ -120,9 +121,11 @@ def get_summary(db: Session, *, days: int | None = None) -> dict:
     total_visits = 0
     cta_clicks = 0
     signups = 0
+    votes = 0
     headline_views: dict[str, int] = {}
     topic_clicks: dict[str, int] = {}
     interest_counts: dict[str, int] = {}
+    signup_sources: dict[str, int] = {}
     scroll_depth = {str(level): 0 for level in _SCROLL_LEVELS}
 
     for ev in events:
@@ -130,11 +133,16 @@ def get_summary(db: Session, *, days: int | None = None) -> dict:
             total_visits += 1
         elif ev.event_name == "cta_click":
             cta_clicks += 1
+        elif ev.event_name == "vote":
+            votes += 1
         elif ev.event_name == "signup":
             signups += 1
-            i = str(_data_of(ev).get("interest", "")).strip()
+            d = _data_of(ev)
+            i = str(d.get("interest", "")).strip()
             if i:
                 interest_counts[i] = interest_counts.get(i, 0) + 1
+            s = str(d.get("source", "")).strip() or "landing_page"
+            signup_sources[s] = signup_sources.get(s, 0) + 1
         elif ev.event_name == "headline_variant":
             h = str(_data_of(ev).get("headline", "")).strip()
             if h:
@@ -165,10 +173,12 @@ def get_summary(db: Session, *, days: int | None = None) -> dict:
         "total_visits": total_visits,
         "cta_clicks": cta_clicks,
         "subscriptions": signups,
+        "votes": votes,
         "conversion_rate": conversion_rate,
         "top_headlines": top_headlines,
         "top_topics": top_topics,
         "topic_clicks": topic_clicks,
+        "signup_sources": signup_sources,
         "scroll_depth": scroll_depth,
         "window_days": days,
     }

@@ -209,3 +209,26 @@ class TopicVote(Base):
     topic_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     voter_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SubscriberTag(Base):
+    """A funnel tag attached to a subscriber (segmentation + automation).
+
+    Applied automatically on signup: everyone gets ``new-lead``; voters get
+    ``voter`` + the topic name; topic submitters get ``contributor`` + the topic.
+    ``source`` records which funnel step created the tag (landing_page / voter /
+    contributor). One row per (subscriber, tag) — new table, auto-created via
+    ``create_all``.
+    """
+
+    __tablename__ = "subscriber_tags"
+    __table_args__ = (UniqueConstraint("subscriber_id", "tag", name="uq_subscriber_tag"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    subscriber_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    tag: Mapped[str] = mapped_column(String(120), nullable=False)
+    source: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    def __repr__(self) -> str:
+        return f"<SubscriberTag sub={self.subscriber_id} tag={self.tag!r}>"

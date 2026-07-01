@@ -51,11 +51,19 @@ async def subscribe_public(
     they arrived via a topic button) and starts the automated 5-email drip
     sequence (email 1 sends immediately).
     """
-    added = _register_subscriber(db=db, email=str(request.email), interest=request.interest)
+    email = str(request.email)
+    added = _register_subscriber(db=db, email=email, interest=request.interest)
+    # Tag the subscriber for segmentation (new-lead / voter / contributor + topic).
+    # Applied even for existing subscribers so a returning visitor who votes or
+    # submits a topic still earns the funnel tag — tags are idempotent.
+    from app.services import tag_service
+    tag_service.apply_signup_tags(
+        db, email=email, source=request.source, interest=request.interest
+    )
     if not added:
         raise HTTPException(status_code=409, detail="Email already subscribed.")
-    background_tasks.add_task(_start_drip, str(request.email))
-    return {"message": "Subscribed successfully.", "email": str(request.email)}
+    background_tasks.add_task(_start_drip, email)
+    return {"message": "Subscribed successfully.", "email": email}
 
 
 @router.post("/emails", status_code=201, tags=["Email List"])

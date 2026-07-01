@@ -60,16 +60,22 @@ def _inline_cta(label: str) -> str:
 def _seq() -> list[dict]:
     return [
         {
-            "subject": "You asked for truth. Here it is.",
-            "eyebrow": "Welcome",
-            "title": "You asked for truth. Here it is.",
+            "subject": "What were Christians really called before \u201cChristian\u201d?",
+            "eyebrow": "Your First Teaching",
+            "title": "What Christians Were Really Called Before \u201cChristian\u201d",
             "inner": (
                 _p("Peace be with you — and welcome to <strong>Odili, The Seeker of Truth</strong>.")
                 + _p(
-                    "This isn't just another newsletter. It's a mission: to defend the truth of "
-                    "the Catholic faith, expose error, and lead souls back to Christ."
+                    "Here's the teaching I promised you. Before the word "
+                    "<em>\u201cChristian\u201d</em> was ever used, the first followers of Jesus were "
+                    "called something else entirely — and what they were called says everything "
+                    "about what the faith really is."
                 )
-                + _p("Your first teaching is waiting. Start where the journey begins:")
+                + _p(
+                    "Most people have never heard this. Once you see it, you'll understand the "
+                    "early Church in a way that changes how you read the rest of Scripture."
+                )
+                + _p("Watch it now — it's the perfect place to begin:")
                 + _inline_cta("Watch the first teaching")
             ),
         },

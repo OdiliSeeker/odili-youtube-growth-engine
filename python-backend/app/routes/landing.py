@@ -342,6 +342,42 @@ _LANDING_HTML = """<!DOCTYPE html>
       .btn { width: 100%; }
       .cta-row { width: 100%; }
     }
+
+    /* ── Vote → notify modal ── */
+    .request-email {
+      width: 100%; padding: 14px 16px; margin-top: 4px;
+      background: var(--panel-2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 15px;
+    }
+    .request-email:focus { outline: none; border-color: var(--gold); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+      padding: 20px; background: rgba(0,0,0,0.78); backdrop-filter: blur(4px);
+    }
+    .modal-overlay.show { display: flex; animation: modalFade .2s ease; }
+    @keyframes modalFade { from { opacity: 0; } to { opacity: 1; } }
+    .modal-card {
+      position: relative; width: 100%; max-width: 440px;
+      background: var(--panel); border: 1px solid var(--gold-dk);
+      border-radius: 16px; padding: 34px 28px 28px; text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+    .modal-card h3 { font-size: 22px; margin-bottom: 8px; }
+    .modal-card p.lead { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+    .modal-card .modal-form { display: flex; flex-direction: column; gap: 12px; }
+    .modal-card input[type=email] {
+      width: 100%; padding: 14px 16px; background: var(--panel-2);
+      border: 1px solid var(--border); border-radius: 10px;
+      color: var(--text); font-size: 15px;
+    }
+    .modal-card input[type=email]:focus { outline: none; border-color: var(--gold); }
+    .modal-close {
+      position: absolute; top: 10px; right: 14px; background: none; border: none;
+      color: var(--muted); font-size: 26px; line-height: 1; cursor: pointer;
+    }
+    .modal-close:hover { color: var(--gold); }
+    .modal-fine { font-size: 12px; color: #6d685f; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -357,10 +393,9 @@ __ODILI_HEADER_HTML__
     <div class="eyebrow reveal">Catholic Truth • History • Apologetics • + More</div>
     <h1 class="reveal" id="main-headline">You Weren't Taught Everything<br><span class="accent">About Salvation.</span></h1>
     <p class="sub reveal">And deep down, you've probably sensed it. There are verses that don't quite fit — teachings that don't fully explain what the early Church believed. This isn't about attacking what you believe. It's about finishing the picture.</p>
-    <div class="urgency-pill reveal">🔥 New teachings every week — rooted in Scripture, Tradition &amp; the earliest Christians</div>
+    <div class="urgency-pill reveal">🎁 Get your first teaching instantly: <strong>What Christians were really called before &ldquo;Christian&rdquo;</strong></div>
     <div class="cta-row reveal">
-      <a class="btn btn-primary" href="#capture" data-cta="hero">Receive the Teachings →</a>
-      <a class="btn btn-red" href="__YOUTUBE_URL__" target="_blank" rel="noopener" data-cta="hero">▶ Watch the 1-Minute Starting Point</a>
+      <a class="btn btn-primary" href="#capture" data-cta="hero">Get the First Teaching →</a>
     </div>
     <div class="reveal" style="margin-top:16px;font-size:13px;color:#6d685f;">No spam. No noise. Just truth, clearly explained.</div>
   </section>
@@ -368,15 +403,15 @@ __ODILI_HEADER_HTML__
   <!-- ── SECTION 2 · EMAIL CAPTURE (primary CTA) ── -->
   <section class="section capture wrap" id="capture">
     <div class="capture-card reveal">
-      <span class="badge">Begin Here</span>
-      <h2>Don't try to piece this together <span class="gold">alone.</span></h2>
-      <p class="lead">Receive short, focused teachings on what the earliest Christians actually believed, where modern interpretations diverged, and how Scripture, Tradition, and history align.</p>
+      <span class="badge">🎁 Free First Teaching</span>
+      <h2>Get the First Teaching Now: <span class="gold">What Christians Were Really Called Before &ldquo;Christian&rdquo;</span></h2>
+      <p class="lead">Enter your email and I'll send it straight to your inbox — plus short, focused teachings on what the earliest Christians actually believed and where modern interpretations diverged.</p>
       <div id="interest-chip" class="interest-chip"></div>
       <form class="capture-form" id="capture-form" onsubmit="joinMission(event)" novalidate>
         <input type="hidden" id="capture-interest" value="">
         <input type="text" id="capture-interest-text" class="capture-other" placeholder="Tell us what you're seeking (optional)…" maxlength="120" aria-label="What you're seeking">
         <input type="email" id="capture-email" placeholder="you@example.com" required autocomplete="email" aria-label="Email address">
-        <button type="submit" class="btn btn-primary" id="capture-btn">Start Learning the Truth →</button>
+        <button type="submit" class="btn btn-primary" id="capture-btn">Send Me the First Teaching →</button>
       </form>
       <div class="capture-fine">No spam. Unsubscribe anytime with one click.</div>
       <div id="capture-msg" class="capture-msg"></div>
@@ -393,8 +428,7 @@ __ODILI_HEADER_HTML__
       </div>
       __VIDEO_BLOCK__
       <div class="cta-row reveal">
-        <a class="btn btn-primary" href="#capture" data-cta="mid">Send Me the Next Teaching →</a>
-        <a class="btn btn-red" href="__YOUTUBE_URL__" target="_blank" rel="noopener" data-cta="mid">▶ Watch on YouTube</a>
+        <a class="btn btn-primary" href="#capture" data-cta="mid">Send Me the First Teaching →</a>
       </div>
     </div>
   </section>
@@ -468,6 +502,7 @@ __ODILI_HEADER_HTML__
         <form class="request-form" id="request-form" onsubmit="submitTopic(event)" novalidate>
           <input type="text" id="request-title" placeholder="The topic you'd like covered…" maxlength="200" required aria-label="Topic title">
           <textarea id="request-desc" placeholder="Add any detail (optional)…" rows="3" maxlength="500" aria-label="Topic detail"></textarea>
+          <input type="email" id="request-email" class="request-email" placeholder="Your email (optional) — get notified when it's answered" maxlength="200" autocomplete="email" aria-label="Your email (optional)">
           <button type="submit" class="btn btn-primary" id="request-btn">Submit Topic</button>
         </form>
         <div id="request-msg" class="request-msg"></div>
@@ -481,8 +516,7 @@ __ODILI_HEADER_HTML__
     <h2>You don't need more opinions.<br><span class="gold">You need clarity.</span></h2>
     <p class="sub" style="max-width:600px;margin:0 auto 30px;color:var(--muted);">And once you see it, you won't unsee it.</p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="#capture" data-cta="final">Receive the Next One →</a>
-      <a class="btn btn-red" href="__YOUTUBE_URL__" target="_blank" rel="noopener" data-cta="final">▶ Watch on YouTube</a>
+      <a class="btn btn-primary" href="#capture" data-cta="final">Get the First Teaching →</a>
     </div>
     <div style="margin-top:20px;font-size:13px;color:#6d685f;">This is for those who want the full truth — not just part of it.</div>
   </section>
@@ -501,6 +535,21 @@ __ODILI_HEADER_HTML__
     </div>
     <div class="foot-copy">© Odili Truth Seeker</div>
   </footer>
+
+  <!-- ── Vote → notify modal ── -->
+  <div class="modal-overlay" id="notify-modal" role="dialog" aria-modal="true" aria-labelledby="notify-title">
+    <div class="modal-card">
+      <button type="button" class="modal-close" onclick="closeNotifyModal()" aria-label="Close">&times;</button>
+      <h3 id="notify-title">✓ Your vote is counted!</h3>
+      <p class="lead">Want to know when <span class="gold" id="notify-topic">this topic</span> gets its teaching? Drop your email and I'll send it the moment it's ready.</p>
+      <form class="modal-form" id="notify-form" onsubmit="submitNotify(event)" novalidate>
+        <input type="email" id="notify-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address">
+        <button type="submit" class="btn btn-primary" id="notify-btn">Notify Me →</button>
+      </form>
+      <div id="notify-msg" class="capture-msg"></div>
+      <div class="modal-fine">No spam. Unsubscribe anytime.</div>
+    </div>
+  </div>
 
 </main>
 
@@ -628,7 +677,7 @@ __ODILI_HEADER_HTML__
       const res = await fetch('/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, interest: interest })
+        body: JSON.stringify({ email: email, interest: interest, source: 'landing_page' })
       });
       if (res.status === 409) {
         msg.className = 'capture-msg ok';
@@ -638,10 +687,12 @@ __ODILI_HEADER_HTML__
         msg.className = 'capture-msg err';
         msg.textContent = (d && d.detail) ? d.detail : 'Something went wrong. Please try again.';
       } else {
-        msg.className = 'capture-msg ok';
-        msg.textContent = "✓ Welcome to the mission — check your inbox.";
+        trackEvent('signup', { headline: currentHeadline, interest: interest, source: 'landing_page' });
         document.getElementById('capture-email').value = '';
-        trackEvent('signup', { headline: currentHeadline, interest: interest });
+        msg.className = 'capture-msg ok';
+        msg.textContent = "✓ Welcome — taking you to your first teaching…";
+        window.location.href = '/thank-you';
+        return;
       }
     } catch (err) {
       msg.className = 'capture-msg err';
@@ -680,7 +731,7 @@ __ODILI_HEADER_HTML__
         const badge = t.trending ? '<span class="topic-badge">🔥 Trending</span>' : '';
         return '<div class="topic-card">' +
             '<div class="topic-main"><div class="topic-title">' + escHtml(t.title) + badge + '</div>' + desc + '</div>' +
-            '<button class="vote-btn' + (isVoted ? ' voted' : '') + '" data-id="' + t.id + '"' + (isVoted ? ' disabled' : '') +
+            '<button class="vote-btn' + (isVoted ? ' voted' : '') + '" data-id="' + t.id + '" data-title="' + escHtml(t.title) + '"' + (isVoted ? ' disabled' : '') +
               ' onclick="voteTopic(' + t.id + ', this)" aria-label="Vote for this topic">' +
               '<span class="vote-arrow">▲</span>' +
               '<span class="vote-count" id="vc-' + t.id + '">' + (t.votes || 0) + '</span>' +
@@ -695,6 +746,7 @@ __ODILI_HEADER_HTML__
 
   async function voteTopic(id, btn) {
     if (btn.disabled) return;
+    const title = btn.getAttribute('data-title') || '';
     btn.disabled = true;
     try {
       const res = await fetch('/topics/' + id + '/vote', { method: 'POST' });
@@ -704,8 +756,65 @@ __ODILI_HEADER_HTML__
       if (vc) vc.textContent = data.votes;
       btn.classList.add('voted');
       rememberVote(id);
+      trackEvent('vote', { topic: title });
+      openNotifyModal(title);
     } catch (err) {
       btn.disabled = false;
+    }
+  }
+
+  // ── Vote → notify modal (captures voter emails as leads) ──
+  var notifyTopic = '';
+  function openNotifyModal(topic) {
+    notifyTopic = topic || '';
+    const m = document.getElementById('notify-modal');
+    const t = document.getElementById('notify-topic');
+    const msg = document.getElementById('notify-msg');
+    const inp = document.getElementById('notify-email');
+    if (msg) { msg.className = 'capture-msg'; msg.textContent = ''; }
+    if (inp) inp.value = '';
+    if (t) t.textContent = topic ? ('"' + topic + '"') : 'this topic';
+    if (m) m.classList.add('show');
+    if (inp) setTimeout(function () { inp.focus(); }, 120);
+  }
+  function closeNotifyModal() {
+    const m = document.getElementById('notify-modal');
+    if (m) m.classList.remove('show');
+  }
+
+  async function submitNotify(e) {
+    e.preventDefault();
+    const email = document.getElementById('notify-email').value.trim();
+    const btn = document.getElementById('notify-btn');
+    const msg = document.getElementById('notify-msg');
+    msg.className = 'capture-msg';
+    if (!email) { msg.className = 'capture-msg err'; msg.textContent = 'Please enter your email address.'; return; }
+
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Saving…';
+    try {
+      const res = await fetch('/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, interest: notifyTopic || null, source: 'voter' })
+      });
+      if (res.ok || res.status === 409) {
+        if (res.ok) trackEvent('signup', { headline: currentHeadline, interest: notifyTopic, source: 'voter' });
+        msg.className = 'capture-msg ok';
+        msg.textContent = "✓ You're on the list — we'll let you know.";
+        setTimeout(closeNotifyModal, 1400);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        msg.className = 'capture-msg err';
+        msg.textContent = (d && d.detail) ? d.detail : 'Something went wrong. Please try again.';
+      }
+    } catch (err) {
+      msg.className = 'capture-msg err';
+      msg.textContent = 'Network error — please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
     }
   }
 
@@ -713,6 +822,8 @@ __ODILI_HEADER_HTML__
     e.preventDefault();
     const title = document.getElementById('request-title').value.trim();
     const desc  = document.getElementById('request-desc').value.trim();
+    const emailEl = document.getElementById('request-email');
+    const email = emailEl ? emailEl.value.trim() : '';
     const btn   = document.getElementById('request-btn');
     const msg   = document.getElementById('request-msg');
     msg.className = 'request-msg';
@@ -736,10 +847,24 @@ __ODILI_HEADER_HTML__
         msg.className = 'request-msg err';
         msg.textContent = detail;
       } else {
+        // Optional email → subscribe the contributor as a lead (source=contributor).
+        if (email) {
+          try {
+            const sres = await fetch('/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: email, interest: title, source: 'contributor' })
+            });
+            if (sres.ok) trackEvent('signup', { headline: currentHeadline, interest: title, source: 'contributor' });
+          } catch (e2) {}
+        }
         msg.className = 'request-msg ok';
-        msg.textContent = '✓ Thank you — your topic has been submitted for review.';
+        msg.textContent = email
+          ? "✓ Thank you — your topic was submitted and you're on the list."
+          : '✓ Thank you — your topic has been submitted for review.';
         document.getElementById('request-title').value = '';
         document.getElementById('request-desc').value = '';
+        if (emailEl) emailEl.value = '';
       }
     } catch (err) {
       msg.className = 'request-msg err';
@@ -900,3 +1025,103 @@ _LANDING_HTML = _LANDING_HTML.replace("__HEADLINES__", json.dumps(HEADLINES))
 async def landing_page() -> HTMLResponse:
     """Public evangelization funnel for Odili — The Seeker of Truth. No internal tools."""
     return HTMLResponse(content=_LANDING_HTML)
+
+
+# ── Thank-you page (post-signup) ─────────────────────────────────────────────
+# Shown after a successful subscribe. Here — and ONLY here, once the lead is
+# captured — we send them to YouTube. This is the moment YouTube CTAs belong.
+_THANKYOU_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/static/logo.png">
+  <title>You're In — Odili, The Seeker of Truth</title>
+  <meta name="robots" content="noindex">
+  __ODILI_HEADER_CSS__
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --gold:#FFD700; --gold-dk:#c8a426; --red:#8B0000; --black:#000;
+            --panel:#0c0c0e; --panel-2:#131316; --text:#f5f1e6; --muted:#9a948a; --border:#26221b; }
+    body {
+      font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background:var(--black); color:var(--text); min-height:100vh;
+      display:flex; flex-direction:column;
+    }
+    .ty-wrap {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      padding:120px 20px 60px; text-align:center;
+    }
+    .ty-card {
+      max-width:600px; width:100%; background:var(--panel);
+      border:1px solid var(--border); border-radius:20px; padding:48px 34px;
+      box-shadow:0 30px 80px rgba(0,0,0,0.5);
+    }
+    .ty-logo { width:96px; height:auto; margin:0 auto 22px; display:block; }
+    .ty-check { font-size:46px; margin-bottom:10px; }
+    .ty-card h1 { font-size:34px; line-height:1.15; margin-bottom:16px; }
+    .ty-card h1 .gold { color:var(--gold); }
+    .ty-lead { color:var(--muted); font-size:16px; line-height:1.6; margin-bottom:14px; }
+    .ty-note {
+      background:var(--panel-2); border:1px solid var(--border); border-radius:12px;
+      padding:16px 18px; font-size:14px; color:var(--muted); margin:22px 0 28px;
+    }
+    .ty-note strong { color:var(--text); }
+    .ty-cta-row { display:flex; flex-direction:column; gap:12px; align-items:stretch; }
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:16px 26px; border-radius:12px; font-weight:700; font-size:16px;
+      text-decoration:none; cursor:pointer; border:1px solid transparent; transition:.18s;
+    }
+    .btn-primary { background:var(--gold); color:#1a1503; }
+    .btn-primary:hover { background:#ffe14d; transform:translateY(-2px); }
+    .btn-red { background:var(--red); color:#fff; border-color:#5e0000; }
+    .btn-red:hover { background:#b81818; transform:translateY(-2px); }
+    .ty-social { margin-top:30px; }
+    .ty-social .foot-social-label { font-size:12px; color:var(--muted); margin-bottom:12px; letter-spacing:.04em; text-transform:uppercase; }
+    .ty-back { display:block; margin-top:26px; color:#6d685f; font-size:13px; text-decoration:none; }
+    .ty-back:hover { color:var(--gold); }
+    @media (max-width:560px){ .ty-card{padding:36px 22px;} .ty-card h1{font-size:27px;} }
+  </style>
+</head>
+<body>
+__ODILI_HEADER_HTML__
+<main class="ty-wrap">
+  <div class="ty-card">
+    <img class="ty-logo" src="__LOGO_URL__" alt="__APP_NAME__ logo">
+    <div class="ty-check">✓</div>
+    <h1>You're In. <span class="gold">Welcome to the mission.</span></h1>
+    <p class="ty-lead">Your first teaching — <strong>what Christians were really called before &ldquo;Christian&rdquo;</strong> — is on its way to your inbox right now.</p>
+    <div class="ty-note">📩 <strong>Check your inbox in the next minute or two.</strong> If you don't see it, look in your Promotions or Spam folder and mark it &ldquo;Not spam&rdquo; so you never miss a teaching.</div>
+    <div class="ty-cta-row">
+      <a class="btn btn-red" href="__YOUTUBE_URL__" target="_blank" rel="noopener">▶ Watch the 1-Minute Starting Point</a>
+      <a class="btn btn-primary" href="__YOUTUBE_URL__" target="_blank" rel="noopener">Subscribe on YouTube →</a>
+    </div>
+    <div class="ty-social">
+      <div class="foot-social-label">Follow the Mission Everywhere</div>
+      __FOOTER_SOCIAL__
+    </div>
+    <a class="ty-back" href="/">← Back to home</a>
+  </div>
+</main>
+</body>
+</html>"""
+
+_THANKYOU_HTML = _THANKYOU_HTML.replace("__ODILI_HEADER_CSS__", HEADER_CSS)
+_THANKYOU_HTML = _THANKYOU_HTML.replace("__ODILI_HEADER_HTML__", header_html())
+_THANKYOU_HTML = _THANKYOU_HTML.replace("__FOOTER_SOCIAL__", social_icons_html())
+_THANKYOU_HTML = _THANKYOU_HTML.replace("__LOGO_URL__", LOGO_URL)
+_THANKYOU_HTML = _THANKYOU_HTML.replace("__APP_NAME__", APP_NAME)
+_THANKYOU_HTML = _THANKYOU_HTML.replace("__YOUTUBE_URL__", YOUTUBE_URL)
+
+
+@router.get("/thank-you", response_class=HTMLResponse, include_in_schema=False)
+async def thank_you_page() -> HTMLResponse:
+    """Post-signup page. The one place we intentionally drive to YouTube."""
+    return HTMLResponse(content=_THANKYOU_HTML)
+
+
+@router.get("/welcome", response_class=HTMLResponse, include_in_schema=False)
+async def welcome_page() -> HTMLResponse:
+    """Alias for the thank-you page."""
+    return HTMLResponse(content=_THANKYOU_HTML)

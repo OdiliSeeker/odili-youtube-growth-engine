@@ -1,5 +1,7 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
+
+VALID_SIGNUP_SOURCES = {"landing_page", "voter", "contributor"}
 
 
 class IdeaRequest(BaseModel):
@@ -20,6 +22,15 @@ class EmailRequest(BaseModel):
 class SubscribeRequest(BaseModel):
     email: EmailStr
     interest: str | None = None
+    source: str | None = None
+
+    @field_validator("source")
+    @classmethod
+    def _clean_source(cls, v: str | None) -> str | None:
+        if not v:
+            return None
+        v = v.strip().lower()
+        return v if v in VALID_SIGNUP_SOURCES else None
 
 
 class EmailListResponse(BaseModel):
